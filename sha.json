@@ -20,9 +20,9 @@
     "rev": "5.3.0"
   },
   "jsoncons": {
-    "commit": "6170b71ee6f2cd64958fc7a14e6f04b36f523d90",
-    "hash": "sha256-7ySbnWiX5pHMG2BcnLowKegEwjSdkKReh72Y3z8cpLg=",
-    "rev": "v1.4.3"
+    "commit": "95a220dff2d927f15e1fe0c7dac2821b7134e4c9",
+    "hash": "sha256-brcOFD6EO6lVL4A+LrZp6CxZFY2mu+i10IQmjwf4XMo=",
+    "rev": "v1.5.0"
   },
   "libevent": {
     "commit": "4f12382b2c39aaed023677ce8b8efa31cb53f964",
@@ -55,9 +55,9 @@
     "rev": "0.12.0"
   },
   "rocksdb": {
-    "commit": "fae8a27fbd6f54aea1a1bfe32c0d058807ceb8f4",
-    "hash": "sha256-Sl5o2uQBS+D43PX827FGTpLIcW6msksFFxGxDyqBdIs=",
-    "rev": "v10.6.2"
+    "commit": "4595a5e95ae8525c42e172a054435782b3479c57",
+    "hash": "sha256-gszW+YY8ZZ7cRVCIXuahGopqqswNRnagZLUYYmRxzGY=",
+    "rev": "v10.10.1"
   },
   "snappy": {
     "commit": "9d83d82d3e166b8b8ef27bfba5faa9a2106f7d95",
@@ -70,9 +70,9 @@
     "rev": "v0.11.0"
   },
   "spdlog": {
-    "commit": "486b55554f11c9cccc913e11a87085b2a91f706f",
-    "hash": "sha256-VB82cNfpJlamUjrQFYElcy0CXAbkPqZkD5zhuLeHLzs=",
-    "rev": "v1.16.0"
+    "commit": "79524ddd08a4ec981b7fea76afd08ee05f83755d",
+    "hash": "sha256-bL3hQmERXNwGmDoi7+wLv/TkppGhG6cO47k1iZvJGzY=",
+    "rev": "v1.17.0"
   },
   "tbb": {
     "commit": "f1862f38f83568d96e814e469ab61f88336cc595",
@@ -80,9 +80,9 @@
     "rev": "v2022.3.0"
   },
   "trie": {
-    "commit": "906e6abd1e7063f1dacd3a6b270aa654b525eb0a",
-    "hash": "sha256-umEyxbG3f4nIXTU9lpaBgM+fdh/Fv9AwV+N6eQV6D0k=",
-    "rev": "906e6abd1e7063f1dacd3a6b270aa654b525eb0a"
+    "commit": "f1380d704eccf753db5f9df175789fff8ff353e0",
+    "hash": "sha256-5L3qSlwYc2G60GPFrEz06eAWdUcdBQTVBLLOf1sLP0c=",
+    "rev": "v0.7.1"
   },
   "xxhash": {
     "commit": "e626a72bc2321cd320e953a0ccf1584cad60f363",
@@ -90,9 +90,9 @@
     "rev": "v0.8.3"
   },
   "zlib": {
-    "commit": "860e4cff7917d93f54f5d7f0bc1d0e8b1a3cb988",
-    "hash": "sha256-Khmrhp5qy4vvoQe4WgoogpjWrgcUB/q8zZeqIydthYg=",
-    "rev": "2.2.4"
+    "commit": "6d9f3dc072369dc719a5fbe71d4e086a96a680bd",
+    "hash": "sha256-lO6fO18Z74+wKF0O/JjfrhS8lyaNQ37eamWGThb39F8=",
+    "rev": "2.3.2"
   },
   "zstd": {
     "commit": "ac66b19e6bd6b83238bf008eecc1298105298532",
