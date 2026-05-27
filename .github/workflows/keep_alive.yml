@@ -4,6 +4,7 @@ permissions: write-all
 
 env:
   TZ: Asia/Shanghai
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   workflow_dispatch:
@@ -16,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     name: keel_alive
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: ci # 避免 github 代码库3个月没提交停止运行 crontab
         shell: bash
         run: |

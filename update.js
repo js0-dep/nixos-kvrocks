@@ -6,7 +6,7 @@ import { cd, $ } from "zx";
 const ROOT = import.meta.dirname;
 cd(ROOT);
 
-await verJson(ROOT, "apache/kvrocks", process.argv[3]);
+await verJson(ROOT, "apache/kvrocks", process.argv[2]);
 
 await $`./update_dep.py`;
 
