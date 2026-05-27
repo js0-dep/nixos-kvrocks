@@ -1,4 +1,4 @@
-name: auto_update
+name: 自动更新
 
 permissions: write-all
 
@@ -15,14 +15,16 @@ on:
 jobs:
   run-it:
     runs-on: ubuntu-latest
-    name: auto_update
+    name: 自动更新
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - uses: oven-sh/setup-bun@v2
-      - name: auto_update
+      - name: 执行自动更新脚本
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -33,8 +35,29 @@ jobs:
           git config --global user.email action@github.com
           git config --global user.name ${{ github.repository_owner }}
           ./auto_update.js
-      - name: push
+          
+          # 检查是否有新的本地提交（表示有版本更新）
+          if [ $(git rev-list --count origin/${{ github.ref_name }}..HEAD) -gt 0 ]; then
+            echo "UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "UPDATED=false" >> $GITHUB_ENV
+          fi
+      - name: 推送 main 分支
+        if: env.UPDATED == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+      - name: 本地合并 main 到 dev 分支
+        if: env.UPDATED == 'true'
+        run: |
+          git fetch origin main dev
+          echo "检测到 main 有新提交，合并到 dev..."
+          git checkout -B dev origin/dev
+          git merge origin/main --no-edit
+      - name: 推送 dev 分支
+        if: env.UPDATED == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: dev
