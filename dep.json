@@ -4,6 +4,11 @@
     "repo": "cpptrace",
     "rev": "v1.0.3"
   },
+  "fast_float": {
+    "owner": "fastfloat",
+    "repo": "fast_float",
+    "rev": "v8.2.7"
+  },
   "fmt": {
     "owner": "fmtlib",
     "repo": "fmt",
@@ -15,14 +20,14 @@
     "rev": "v1.17.0"
   },
   "jemalloc": {
-    "owner": "facebook",
+    "owner": "jemalloc",
     "repo": "jemalloc",
-    "rev": "5.3.0"
+    "rev": "5.3.1"
   },
   "jsoncons": {
     "owner": "danielaparker",
     "repo": "jsoncons",
-    "rev": "v1.5.0"
+    "rev": "v1.7.0"
   },
   "libevent": {
     "owner": "libevent",
@@ -32,12 +37,12 @@
   "lua": {
     "owner": "RocksLabs",
     "repo": "lua",
-    "rev": "f458c3d797db31155fa0c156d5301716df48cb8c"
+    "rev": "c77781d0c23df021a903a9a6199d301ec559e9cd"
   },
   "luajit": {
     "owner": "RocksLabs",
     "repo": "LuaJIT",
-    "rev": "c0a8e68325ec261a77bde1c8eabad398168ffe74"
+    "rev": "02dfcc34e93e57ac96e566d123c66ee01e650299"
   },
   "lz4": {
     "owner": "lz4",
@@ -57,7 +62,7 @@
   "rocksdb": {
     "owner": "facebook",
     "repo": "rocksdb",
-    "rev": "v10.10.1"
+    "rev": "v11.1.1"
   },
   "snappy": {
     "owner": "RocksLabs",
@@ -77,7 +82,7 @@
   "tbb": {
     "owner": "uxlfoundation",
     "repo": "oneTBB",
-    "rev": "v2022.3.0"
+    "rev": "v2023.0.0"
   },
   "trie": {
     "owner": "Tessil",
@@ -92,7 +97,7 @@
   "zlib": {
     "owner": "zlib-ng",
     "repo": "zlib-ng",
-    "rev": "2.3.2"
+    "rev": "2.3.3"
   },
   "zstd": {
     "owner": "facebook",

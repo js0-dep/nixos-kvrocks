@@ -4,6 +4,11 @@
     "hash": "sha256-8H1eJQYQn1DsVsJ0OpJAOJSWD/0iSn1SQLzg1elyEmM=",
     "rev": "v1.0.3"
   },
+  "fast_float": {
+    "commit": "e0b53eaf63c6d00e0725788ef1dbb759aa321d79",
+    "hash": "sha256-Ks3ChZ54PnVb1NOyXRMXB9GUUQs4zAN6HL2aRFrYGbY=",
+    "rev": "v8.2.7"
+  },
   "fmt": {
     "commit": "407c905e45ad75fc29bf0f9bb7c5c2fd3475976f",
     "hash": "sha256-ZmI1Dv0ZabPlxa02OpERI47jp7zFfjpeWCy1WyuPYZ0=",
@@ -15,14 +20,14 @@
     "rev": "v1.17.0"
   },
   "jemalloc": {
-    "commit": "cc611be82c57f8f2411347abb96af8c705c972eb",
-    "hash": "sha256-bb0OhZVXyvN+hf9BpPSykn5cGm87a0C+Y/iXKt9wTSs=",
-    "rev": "5.3.0"
+    "commit": "2b974b6977f3b0ca7586e3e2b679a8da7f1aa969",
+    "hash": "sha256-uGQppR2LS/Hhx4eWnavPDW3tzMyI1Df4XYrWEMQwBuw=",
+    "rev": "5.3.1"
   },
   "jsoncons": {
-    "commit": "95a220dff2d927f15e1fe0c7dac2821b7134e4c9",
-    "hash": "sha256-brcOFD6EO6lVL4A+LrZp6CxZFY2mu+i10IQmjwf4XMo=",
-    "rev": "v1.5.0"
+    "commit": "cb54cdc3134a62634466bf7bcd24f1a906f4ef25",
+    "hash": "sha256-OhXcHMec+cExLLl0GuXoro93u1w/BTLY5bBh+4uUK5s=",
+    "rev": "v1.7.0"
   },
   "libevent": {
     "commit": "4f12382b2c39aaed023677ce8b8efa31cb53f964",
@@ -30,14 +35,14 @@
     "rev": "release-2.1.12-stable"
   },
   "lua": {
-    "commit": "f458c3d797db31155fa0c156d5301716df48cb8c",
-    "hash": "sha256-8nlfUOZnuLfY9CwOxkjDP74fvYtJosqg8VpRuAO4jH0=",
-    "rev": "f458c3d797db31155fa0c156d5301716df48cb8c"
+    "commit": "c77781d0c23df021a903a9a6199d301ec559e9cd",
+    "hash": "sha256-YJg8j8wHE7VwX0SGzWmHNdrkMq8dj+kUo1cMkwEIMn0=",
+    "rev": "c77781d0c23df021a903a9a6199d301ec559e9cd"
   },
   "luajit": {
-    "commit": "c0a8e68325ec261a77bde1c8eabad398168ffe74",
-    "hash": "sha256-Wjh14d0JR5ecAwdYVBjQYIHb2vJ1I61oR0N0LMmtq4E=",
-    "rev": "c0a8e68325ec261a77bde1c8eabad398168ffe74"
+    "commit": "02dfcc34e93e57ac96e566d123c66ee01e650299",
+    "hash": "sha256-HINP9nahXHTManDMAAJBOUlSSxv5JZhlHs96HHkE7qE=",
+    "rev": "02dfcc34e93e57ac96e566d123c66ee01e650299"
   },
   "lz4": {
     "commit": "ebb370ca83af193212df4dcbadcc5d87bc0de2f0",
@@ -55,9 +60,9 @@
     "rev": "0.12.0"
   },
   "rocksdb": {
-    "commit": "4595a5e95ae8525c42e172a054435782b3479c57",
-    "hash": "sha256-gszW+YY8ZZ7cRVCIXuahGopqqswNRnagZLUYYmRxzGY=",
-    "rev": "v10.10.1"
+    "commit": "6cdeb9d9d0630763327f512e6255cab33f6834e7",
+    "hash": "sha256-1+rCJ4sYvAWm46oR5+0vJodVE5Rwogo0BqkznBr+Db8=",
+    "rev": "v11.1.1"
   },
   "snappy": {
     "commit": "9d83d82d3e166b8b8ef27bfba5faa9a2106f7d95",
@@ -75,9 +80,9 @@
     "rev": "v1.17.0"
   },
   "tbb": {
-    "commit": "f1862f38f83568d96e814e469ab61f88336cc595",
-    "hash": "sha256-HIHF6KHlEI4rgQ9Epe0+DmNe1y95K9iYa4V/wFnJfEU=",
-    "rev": "v2022.3.0"
+    "commit": "ea2f73b591993e1bd0433a50a2fcfac0a78e0f73",
+    "hash": "sha256-algLvvVHHCQTiwxNX7gM6vfpSadR7fu49CBtfx2LSPk=",
+    "rev": "v2023.0.0"
   },
   "trie": {
     "commit": "f1380d704eccf753db5f9df175789fff8ff353e0",
@@ -90,9 +95,9 @@
     "rev": "v0.8.3"
   },
   "zlib": {
-    "commit": "6d9f3dc072369dc719a5fbe71d4e086a96a680bd",
-    "hash": "sha256-lO6fO18Z74+wKF0O/JjfrhS8lyaNQ37eamWGThb39F8=",
-    "rev": "2.3.2"
+    "commit": "12731092979c6d07f42da27da673a9f6c7b13586",
+    "hash": "sha256-6GlHCnx9dQtmViPnvHnMS+l9Z+g6M8ynrSxLhLtmAKU=",
+    "rev": "2.3.3"
   },
   "zstd": {
     "commit": "ac66b19e6bd6b83238bf008eecc1298105298532",
