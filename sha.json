@@ -10,14 +10,14 @@
     "rev": "v8.2.7"
   },
   "fmt": {
-    "commit": "407c905e45ad75fc29bf0f9bb7c5c2fd3475976f",
-    "hash": "sha256-ZmI1Dv0ZabPlxa02OpERI47jp7zFfjpeWCy1WyuPYZ0=",
-    "rev": "12.1.0"
+    "commit": "1be298e1bd68957e4cd352e1f676f00e07dcfb57",
+    "hash": "sha256-Tc7PmNxUv7ajw6GaHPGEEtrD/fl6is7RB8TPestJa1o=",
+    "rev": "12.2.0"
   },
   "gtest": {
-    "commit": "52eb8108c5bdec04579160ae17225d66034bd723",
-    "hash": "sha256-HIHMxAUR4bjmFLoltJeIAVSulVQ6kVuIT2Ku+lwAx/4=",
-    "rev": "v1.17.0"
+    "commit": "063de7e9578f82b369302001269680b4b1553359",
+    "hash": "sha256-rXsn2L0xeWvfxTjMAoWEu0UFZ7xOSfYmhbKgRF5J9co=",
+    "rev": "v1.18.0"
   },
   "jemalloc": {
     "commit": "2b974b6977f3b0ca7586e3e2b679a8da7f1aa969",
@@ -25,14 +25,14 @@
     "rev": "5.3.1"
   },
   "jsoncons": {
-    "commit": "cb54cdc3134a62634466bf7bcd24f1a906f4ef25",
-    "hash": "sha256-OhXcHMec+cExLLl0GuXoro93u1w/BTLY5bBh+4uUK5s=",
-    "rev": "v1.7.0"
+    "commit": "bcb44594c50c495ee1e690602cdd71455942ad0e",
+    "hash": "sha256-Jf+RoSRCswjF1Hq4bGdDhmAYrUEkhfQ+3ikTcXvqcl0=",
+    "rev": "v1.9.0"
   },
   "libevent": {
-    "commit": "4f12382b2c39aaed023677ce8b8efa31cb53f964",
-    "hash": "sha256-M/OgLkgQs+LwGkqv5vu26vluntDAJX5ZsHjjMVM1BqU=",
-    "rev": "release-2.1.12-stable"
+    "commit": "211c4234e44e0e7df720f744a0c70be017e39622",
+    "hash": "sha256-JYA50pqzar4vWg5omjToS3tfLXjTGDRMNbdEb3sqyFk=",
+    "rev": "release-2.1.13-stable"
   },
   "lua": {
     "commit": "c77781d0c23df021a903a9a6199d301ec559e9cd",
@@ -60,9 +60,9 @@
     "rev": "0.12.0"
   },
   "rocksdb": {
-    "commit": "6cdeb9d9d0630763327f512e6255cab33f6834e7",
-    "hash": "sha256-1+rCJ4sYvAWm46oR5+0vJodVE5Rwogo0BqkznBr+Db8=",
-    "rev": "v11.1.1"
+    "commit": "abeebd9630f11bd08c28b7bd43c7bdfc62050654",
+    "hash": "sha256-zjOo0H8/qA879Lcw5wHp2BZzOhl+/wYluxKD9RCfQ+0=",
+    "rev": "v11.8.1"
   },
   "snappy": {
     "commit": "9d83d82d3e166b8b8ef27bfba5faa9a2106f7d95",

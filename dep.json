@@ -12,12 +12,12 @@
   "fmt": {
     "owner": "fmtlib",
     "repo": "fmt",
-    "rev": "12.1.0"
+    "rev": "12.2.0"
   },
   "gtest": {
     "owner": "google",
     "repo": "googletest",
-    "rev": "v1.17.0"
+    "rev": "v1.18.0"
   },
   "jemalloc": {
     "owner": "jemalloc",
@@ -27,12 +27,12 @@
   "jsoncons": {
     "owner": "danielaparker",
     "repo": "jsoncons",
-    "rev": "v1.7.0"
+    "rev": "v1.9.0"
   },
   "libevent": {
     "owner": "libevent",
     "repo": "libevent",
-    "rev": "release-2.1.12-stable"
+    "rev": "release-2.1.13-stable"
   },
   "lua": {
     "owner": "RocksLabs",
@@ -62,7 +62,7 @@
   "rocksdb": {
     "owner": "facebook",
     "repo": "rocksdb",
-    "rev": "v11.1.1"
+    "rev": "v11.8.1"
   },
   "snappy": {
     "owner": "RocksLabs",
