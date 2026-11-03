@@ -47,17 +47,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-      - name: 本地合并 main 到 dev 分支
-        if: env.UPDATED == 'true'
-        run: |
-          git fetch origin main dev
-          echo "检测到 main 有新提交，合并到 dev..."
-          git checkout -B dev origin/dev
-          git merge origin/main --no-edit
-      - name: 推送 dev 分支
-        if: env.UPDATED == 'true'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: dev
+          branch: main
