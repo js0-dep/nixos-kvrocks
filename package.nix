@@ -10,8 +10,7 @@
   openssl,
   cctools,
   libiconv,
-  lld,
-  llvm,
+  llvmPackages,
   buildPackages ? { inherit stdenv; },
 }: let
   dep = builtins.fromJSON (builtins.readFile ./dep.json);
@@ -275,9 +274,9 @@ in
       ninja
       git
       autoconf
-      llvm
+      llvmPackages.llvm
     ]
-    ++ lib.optional stdenv.isLinux lld;
+    ++ lib.optional stdenv.isLinux llvmPackages.bintools;
 
     buildInputs =
       [
@@ -299,15 +298,15 @@ in
       (lib.cmakeFeature "PORTABLE" "1")
       (lib.cmakeBool "ENABLE_LTO" true)
       (lib.cmakeBool "FETCHCONTENT_FULLY_DISCONNECTED" true)
-      "-DCMAKE_AR=${llvm}/bin/llvm-ar"
-      "-DCMAKE_RANLIB=${llvm}/bin/llvm-ranlib"
-      "-DCMAKE_C_COMPILER_AR=${llvm}/bin/llvm-ar"
-      "-DCMAKE_CXX_COMPILER_AR=${llvm}/bin/llvm-ar"
-      "-DCMAKE_C_COMPILER_RANLIB=${llvm}/bin/llvm-ranlib"
-      "-DCMAKE_CXX_COMPILER_RANLIB=${llvm}/bin/llvm-ranlib"
+      "-DCMAKE_AR=${llvmPackages.llvm}/bin/llvm-ar"
+      "-DCMAKE_RANLIB=${llvmPackages.llvm}/bin/llvm-ranlib"
+      "-DCMAKE_C_COMPILER_AR=${llvmPackages.llvm}/bin/llvm-ar"
+      "-DCMAKE_CXX_COMPILER_AR=${llvmPackages.llvm}/bin/llvm-ar"
+      "-DCMAKE_C_COMPILER_RANLIB=${llvmPackages.llvm}/bin/llvm-ranlib"
+      "-DCMAKE_CXX_COMPILER_RANLIB=${llvmPackages.llvm}/bin/llvm-ranlib"
     ]
     ++ lib.optionals stdenv.isLinux [
-      "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+      "-DCMAKE_EXE_LINKER_FLAGS=-B${llvmPackages.bintools}/bin -fuse-ld=lld -latomic"
     ]
     ++ lib.optionals stdenv.isDarwin [
       "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"
