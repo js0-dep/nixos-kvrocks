@@ -305,15 +305,13 @@ in
       "-DCMAKE_C_COMPILER_RANLIB=${llvmPackages.llvm}/bin/llvm-ranlib"
       "-DCMAKE_CXX_COMPILER_RANLIB=${llvmPackages.llvm}/bin/llvm-ranlib"
     ]
-    ++ lib.optionals stdenv.isLinux [
-      "-DCMAKE_EXE_LINKER_FLAGS=-B${llvmPackages.bintools}/bin -fuse-ld=lld -latomic"
-    ]
     ++ lib.optionals stdenv.isDarwin [
       "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"
     ]
     ++ fetchFlags;
 
     NIX_CFLAGS_COMPILE = buildFlags;
+    NIX_CFLAGS_LINK = lib.optionalString stdenv.isLinux "-B${llvmPackages.bintools}/bin -fuse-ld=lld -latomic";
     CXXFLAGS = buildFlags;
     CFLAGS = buildFlags;
 
