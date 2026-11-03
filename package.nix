@@ -285,6 +285,7 @@ in
       ];
 
     cmakeFlags = [
+      (lib.cmakeBool "CMAKE_CXX_SCAN_FOR_MODULES" false)
       (lib.cmakeBool "DISABLE_JEMALLOC" false)
       (lib.cmakeBool "ENABLE_STATIC_LIBSTDCXX" false)
       (lib.cmakeBool "ENABLE_LUAJIT" true)
