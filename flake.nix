@@ -19,21 +19,12 @@
       pkgs,
       system,
     }: let
-      kvrocks = pkgs.callPackage ./package.nix {};
+      kvrocks = pkgs.callPackage ./package.nix {
+        stdenv = pkgs.clangStdenv;
+      };
     in {
       default = kvrocks;
       kvrocks = kvrocks;
-      # Optimized variants
-      kvrocks-v3 = pkgs.callPackage ./package.nix {
-        march = "x86-64-v3";
-      };
-      kvrocks-native = pkgs.callPackage ./package.nix {
-        march = "native";
-      };
-      kvrocks-clang = pkgs.callPackage ./package.nix {
-        stdenv = pkgs.llvmPackages.stdenv;
-        enableLto = true;
-      };
     });
 
     nixosModules.kvrocks = (import ./nixos/kvrocks.nix) self;

@@ -8,12 +8,8 @@
   git,
   cctools,
   libiconv,
+  lld,
   buildPackages ? { inherit stdenv; },
-  # Optimization & configuration options
-  enableLuaJIT ? true,
-  enableLto ? false,
-  march ? null, # e.g. "x86-64-v3" or "native"
-  portable ? (march == null),
 }: let
   dep = builtins.fromJSON (builtins.readFile ./dep.json);
   sha = builtins.fromJSON (builtins.readFile ./sha.json);
@@ -28,6 +24,17 @@
     mainProgram = "kvrocks";
   };
 
+  # Target architecture optimizations without breaking reproducibility:
+  # - x86_64: x86-64-v3 (AVX, AVX2, FMA, BMI1/2) supported on all modern servers since 2015
+  # - aarch64: armv8-a+crc+crypto supported on all modern 64-bit ARM servers and Apple Silicon
+  archFlags =
+    if stdenv.isx86_64 then
+      "-march=x86-64-v3"
+    else if stdenv.isAarch64 then
+      "-march=armv8-a+crc+crypto"
+    else
+      "";
+
   kvrocks_src = fetchFromGitHub {
     owner = "apache";
     repo = "kvrocks";
@@ -35,7 +42,7 @@
     hash = versionInfo.hash;
   };
 
-  # Pre-build jemalloc
+  # Pre-build jemalloc with tuned flags
   jemalloc-prebuilt = stdenv.mkDerivation {
     pname = "jemalloc-kvrocks";
     version = sha.jemalloc.commit;
@@ -51,6 +58,7 @@
       "--disable-libdl"
       "--with-jemalloc-prefix="
     ];
+    NIX_CFLAGS_COMPILE = archFlags;
     preConfigure = ''
       autoconf
     '';
@@ -58,26 +66,6 @@
       mkdir -p $out/lib $out/include
       cp lib/libjemalloc.a $out/lib/
       cp -r include/jemalloc $out/include/
-    '';
-  };
-
-  # Pre-build lua (if LuaJIT is disabled)
-  lua-prebuilt = stdenv.mkDerivation {
-    pname = "lua-kvrocks";
-    version = sha.lua.commit;
-    src = fetchFromGitHub {
-      inherit (dep.lua) owner repo;
-      rev = sha.lua.commit;
-      hash = sha.lua.hash;
-    };
-    buildPhase = ''
-      cd src
-      make liblua.a CC=${stdenv.cc.targetPrefix}cc AR="${stdenv.cc.targetPrefix}ar rcu"
-    '';
-    installPhase = ''
-      mkdir -p $out/lib $out/include
-      cp liblua.a $out/lib/
-      cp *.h $out/include/
     '';
   };
 
@@ -121,7 +109,7 @@
     '';
   };
 
-  # Pre-build lz4
+  # Pre-build lz4 with SIMD vectorization
   lz4-prebuilt = stdenv.mkDerivation {
     pname = "lz4-kvrocks";
     version = sha.lz4.commit;
@@ -138,9 +126,10 @@
       "-DBUILD_SHARED_LIBS=OFF"
       "-DBUILD_STATIC_LIBS=ON"
     ];
+    NIX_CFLAGS_COMPILE = archFlags;
   };
 
-  # Pre-build zstd
+  # Pre-build zstd with SIMD vectorization
   zstd-prebuilt = stdenv.mkDerivation {
     pname = "zstd-kvrocks";
     version = sha.zstd.commit;
@@ -159,6 +148,7 @@
       "-DZSTD_BUILD_STATIC=ON"
       "-DZSTD_LEGACY_SUPPORT=OFF"
     ];
+    NIX_CFLAGS_COMPILE = archFlags;
   };
 in
   stdenv.mkDerivation (finalAttrs: let
@@ -171,17 +161,6 @@ in
           hash = sha.${name}.hash;
         })
       (builtins.removeAttrs dep ["jemalloc" "lua" "luajit" "lz4" "zstd"]);
-
-    lua-source = runCommand "lua-source" {} ''
-      cp -r ${sources.lua or (fetchFromGitHub {
-        inherit (dep.lua) owner repo;
-        rev = sha.lua.commit;
-        hash = sha.lua.hash;
-      })} $out
-      chmod -R +w $out
-      mkdir -p $out/src
-      cp ${lua-prebuilt}/lib/liblua.a $out/src/ || true
-    '';
 
     luajit-source = runCommand "luajit-source" {} ''
       cp -r ${sources.luajit or (fetchFromGitHub {
@@ -222,9 +201,8 @@ in
         name: src: "-DFETCHCONTENT_SOURCE_DIR_${lib.toUpper name}=${src}"
       )
       sources
-      ++ (lib.optional (!enableLuaJIT) "-DFETCHCONTENT_SOURCE_DIR_LUA=${lua-source}")
-      ++ (lib.optional enableLuaJIT "-DFETCHCONTENT_SOURCE_DIR_LUAJIT=${luajit-source}")
       ++ [
+        "-DFETCHCONTENT_SOURCE_DIR_LUAJIT=${luajit-source}"
         "-DFETCHCONTENT_SOURCE_DIR_LZ4=${lz4-source}"
         "-DFETCHCONTENT_SOURCE_DIR_ZSTD=${zstd-source}"
       ];
@@ -234,9 +212,11 @@ in
         "-O3"
         "-DNDEBUG"
         "-fno-omit-frame-pointer"
+        "-fno-plt"
+        "-fvisibility-inlines-hidden"
+        "-flto=thin"
       ]
-      ++ lib.optional (march != null) "-march=${march}"
-      ++ lib.optional enableLto "-flto=thin";
+      ++ lib.optional (archFlags != "") archFlags;
 
     buildFlags = lib.concatStringsSep " " optFlags;
   in {
@@ -252,7 +232,7 @@ in
         sed -i '/add_custom_target(make_/,/^  )/d' $f
         sed -i '/add_dependencies(/d' $f
       }
-      sedDep ${if enableLuaJIT then "luajit" else "lua"}
+      sedDep luajit
       sedDep lz4
       sedDep zstd
 
@@ -275,7 +255,8 @@ in
       cmake
       git
       autoconf
-    ];
+    ]
+    ++ lib.optional stdenv.isLinux lld;
 
     buildInputs =
       [
@@ -291,11 +272,11 @@ in
       [
         "-DENABLE_STATIC_LIBSTDCXX=OFF"
         "-DDISABLE_JEMALLOC=OFF"
-        "-DENABLE_LUAJIT=${if enableLuaJIT then "ON" else "OFF"}"
+        "-DENABLE_LUAJIT=ON"
         "-DCMAKE_BUILD_TYPE=Release"
         "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
-        "-DPORTABLE=${if portable then "1" else "0"}"
-        "-DENABLE_LTO=${if enableLto then "ON" else "OFF"}"
+        "-DPORTABLE=1"
+        "-DENABLE_LTO=ON"
       ]
       ++ lib.optionals stdenv.isDarwin [
         "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"

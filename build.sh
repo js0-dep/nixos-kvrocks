@@ -4,8 +4,6 @@ set -euo pipefail
 DIR=$(realpath "$0") && DIR=${DIR%/*}
 cd "$DIR"
 
-TARGET="${1:-default}"
-
 if ! command -v nix &>/dev/null; then
   echo "❌ Nix is not installed."
   if command -v brew &>/dev/null; then
@@ -19,6 +17,6 @@ if ! command -v nix &>/dev/null; then
   fi
 fi
 
-echo "🔨 Building kvrocks (target: .#${TARGET})..."
+echo "🔨 Building kvrocks..."
 rm -f result
-exec nix build ".#${TARGET}" --print-build-logs --extra-experimental-features "nix-command flakes" "$@"
+exec nix build .#default --print-build-logs --extra-experimental-features "nix-command flakes" "$@"

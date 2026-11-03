@@ -41,17 +41,7 @@
 要编译项目，请在项目根目录中执行 `nix build` 命令。
 
 ```shell
-# 标准通用构建
 nix build
-
-# 现代 x86_64 服务器性能优化版 (支持 AVX2, FMA, BMI1/2)
-nix build .#kvrocks-v3
-
-# 本地机器原生 CPU 架构极致优化版
-nix build .#kvrocks-native
-
-# 基于 LLVM/Clang + ThinLTO 链接优化版
-nix build .#kvrocks-clang
 ```
 
 此命令会构建 `kvrocks` 包。输出是当前目录下的一个名为 `result` 的符号链接，指向 Nix store 中的构建产物。
