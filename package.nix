@@ -5,7 +5,9 @@
   runCommand,
   autoconf,
   cmake,
+  ninja,
   git,
+  openssl,
   cctools,
   libiconv,
   lld,
@@ -225,6 +227,13 @@ in
     src = kvrocks_src;
     inherit meta;
 
+    strictDeps = true;
+
+    # On aarch64-darwin, libc++ hardening can trigger a SIGTRAP in RocksDB startup path
+    hardeningDisable = lib.optionals (stdenv.hostPlatform.isDarwin && stdenv.hostPlatform.isAarch64) [
+      "libcxxhardeningfast"
+    ];
+
     postPatch = ''
       sedDep(){
         local f=cmake/$1.cmake
@@ -246,6 +255,11 @@ in
       add_library(JeMalloc::JeMalloc ALIAS jemalloc)
       EOF
 
+      # Remove static compiler runtime flags that interfere with Clang/LLD
+      substituteInPlace CMakeLists.txt \
+        --replace-quiet 'set(CMAKE_EXE_LINKER_FLAGS "''${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")' "" \
+        --replace-quiet 'set(CMAKE_EXE_LINKER_FLAGS "''${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")' ""
+
       sed -i '/add_executable(unittest/d' CMakeLists.txt
       sed -i '/target_include_directories(unittest/d' CMakeLists.txt
       sed -i '/target_link_libraries(unittest/d' CMakeLists.txt
@@ -253,6 +267,7 @@ in
 
     nativeBuildInputs = [
       cmake
+      ninja
       git
       autoconf
     ]
@@ -261,6 +276,7 @@ in
     buildInputs =
       [
         jemalloc-prebuilt
+        openssl
         stdenv.cc.cc.lib
       ]
       ++ lib.optionals stdenv.isDarwin [
@@ -268,20 +284,19 @@ in
         libiconv
       ];
 
-    cmakeFlags =
-      [
-        "-DENABLE_STATIC_LIBSTDCXX=OFF"
-        "-DDISABLE_JEMALLOC=OFF"
-        "-DENABLE_LUAJIT=ON"
-        "-DCMAKE_BUILD_TYPE=Release"
-        "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
-        "-DPORTABLE=1"
-        "-DENABLE_LTO=ON"
-      ]
-      ++ lib.optionals stdenv.isDarwin [
-        "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"
-      ]
-      ++ fetchFlags;
+    cmakeFlags = [
+      (lib.cmakeBool "DISABLE_JEMALLOC" false)
+      (lib.cmakeBool "ENABLE_STATIC_LIBSTDCXX" false)
+      (lib.cmakeBool "ENABLE_LUAJIT" true)
+      (lib.cmakeBool "ENABLE_OPENSSL" true)
+      (lib.cmakeFeature "PORTABLE" "1")
+      (lib.cmakeBool "ENABLE_LTO" true)
+      (lib.cmakeBool "FETCHCONTENT_FULLY_DISCONNECTED" true)
+    ]
+    ++ lib.optionals stdenv.isDarwin [
+      "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"
+    ]
+    ++ fetchFlags;
 
     NIX_CFLAGS_COMPILE = buildFlags;
     CXXFLAGS = buildFlags;
@@ -295,22 +310,17 @@ in
 
     preConfigure = ''
       export shareDocName="kvrocks"
-      mkdir -p build
-    '';
-
-    buildPhase = ''
-      runHook preBuild
-      make -j$NIX_BUILD_CORES
-      runHook postBuild
     '';
 
     dontUseCmakeInstall = true;
 
     installPhase = ''
       runHook preInstall
-      mkdir -p $out/bin
+      mkdir -p $out/bin $out/etc
       cp kvrocks kvrocks2redis $out/bin/
       chmod 755 $out/bin/kvrocks $out/bin/kvrocks2redis
+      cp $src/kvrocks.conf $out/etc/
+      chmod 644 $out/etc/kvrocks.conf
       runHook postInstall
     '';
 
