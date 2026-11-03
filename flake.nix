@@ -301,6 +301,7 @@
           [
             "-DENABLE_STATIC_LIBSTDCXX=OFF"
             "-DDISABLE_JEMALLOC=OFF"
+            "-DENABLE_LUAJIT=ON"
             "-DCMAKE_BUILD_TYPE=Release"
             "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
           ]
