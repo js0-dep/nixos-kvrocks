@@ -1,0 +1,338 @@
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  runCommand,
+  autoconf,
+  cmake,
+  git,
+  cctools,
+  libiconv,
+  buildPackages ? { inherit stdenv; },
+  # Optimization & configuration options
+  enableLuaJIT ? true,
+  enableLto ? false,
+  march ? null, # e.g. "x86-64-v3" or "native"
+  portable ? (march == null),
+}: let
+  dep = builtins.fromJSON (builtins.readFile ./dep.json);
+  sha = builtins.fromJSON (builtins.readFile ./sha.json);
+  versionInfo = builtins.fromJSON (builtins.readFile ./ver.json);
+
+  meta = with lib; {
+    description = "A distributed key-value NoSQL database that uses RocksDB as storage engine and is compatible with Redis protocol";
+    homepage = "https://kvrocks.apache.org/";
+    license = licenses.asl20;
+    maintainers = ["jssite <jssite@googlegroups.com>"];
+    platforms = platforms.linux ++ platforms.darwin;
+    mainProgram = "kvrocks";
+  };
+
+  kvrocks_src = fetchFromGitHub {
+    owner = "apache";
+    repo = "kvrocks";
+    rev = versionInfo.rev;
+    hash = versionInfo.hash;
+  };
+
+  # Pre-build jemalloc
+  jemalloc-prebuilt = stdenv.mkDerivation {
+    pname = "jemalloc-kvrocks";
+    version = sha.jemalloc.commit;
+    src = fetchFromGitHub {
+      inherit (dep.jemalloc) owner repo;
+      rev = sha.jemalloc.commit;
+      hash = sha.jemalloc.hash;
+    };
+    nativeBuildInputs = [autoconf];
+    configureFlags = [
+      "--enable-static"
+      "--disable-shared"
+      "--disable-libdl"
+      "--with-jemalloc-prefix="
+    ];
+    preConfigure = ''
+      autoconf
+    '';
+    installPhase = ''
+      mkdir -p $out/lib $out/include
+      cp lib/libjemalloc.a $out/lib/
+      cp -r include/jemalloc $out/include/
+    '';
+  };
+
+  # Pre-build lua (if LuaJIT is disabled)
+  lua-prebuilt = stdenv.mkDerivation {
+    pname = "lua-kvrocks";
+    version = sha.lua.commit;
+    src = fetchFromGitHub {
+      inherit (dep.lua) owner repo;
+      rev = sha.lua.commit;
+      hash = sha.lua.hash;
+    };
+    buildPhase = ''
+      cd src
+      make liblua.a CC=${stdenv.cc.targetPrefix}cc AR="${stdenv.cc.targetPrefix}ar rcu"
+    '';
+    installPhase = ''
+      mkdir -p $out/lib $out/include
+      cp liblua.a $out/lib/
+      cp *.h $out/include/
+    '';
+  };
+
+  # Pre-build luajit
+  luajit-prebuilt = stdenv.mkDerivation {
+    pname = "luajit-kvrocks";
+    version = sha.luajit.commit;
+    src = fetchFromGitHub {
+      inherit (dep.luajit) owner repo;
+      rev = sha.luajit.commit;
+      hash = sha.luajit.hash;
+    };
+    nativeBuildInputs = [buildPackages.stdenv.cc];
+    buildPhase = ''
+      cd src
+      export HOST_CC="${buildPackages.stdenv.cc.targetPrefix}cc"
+      export STATIC_CC="${stdenv.cc.targetPrefix}cc"
+      export DYNAMIC_CC="${stdenv.cc.targetPrefix}cc -fPIC"
+      export TARGET_LD="${stdenv.cc.targetPrefix}cc"
+
+      ${
+        if stdenv.isAarch64
+        then ''
+          export TARGET_CFLAGS="-DLUAJIT_TARGET=LUAJIT_ARCH_ARM64"
+        ''
+        else if stdenv.isx86_64
+        then ''
+          export TARGET_CFLAGS="-DLUAJIT_TARGET=LUAJIT_ARCH_X64"
+        ''
+        else ''
+          export TARGET_CFLAGS=""
+        ''
+      }
+
+      make libluajit.a CC="${stdenv.cc.targetPrefix}cc" HOST_CC="${buildPackages.stdenv.cc.targetPrefix}cc" TARGET_STRIP=@:
+    '';
+    installPhase = ''
+      mkdir -p $out/lib $out/include
+      cp libluajit.a $out/lib/
+      cp *.h $out/include/
+    '';
+  };
+
+  # Pre-build lz4
+  lz4-prebuilt = stdenv.mkDerivation {
+    pname = "lz4-kvrocks";
+    version = sha.lz4.commit;
+    src = fetchFromGitHub {
+      inherit (dep.lz4) owner repo;
+      rev = sha.lz4.commit;
+      hash = sha.lz4.hash;
+    };
+    nativeBuildInputs = [cmake];
+    cmakeDir = "../build/cmake";
+    cmakeFlags = [
+      "-DLZ4_BUILD_CLI=OFF"
+      "-DLZ4_BUILD_LEGACY_LZ4C=OFF"
+      "-DBUILD_SHARED_LIBS=OFF"
+      "-DBUILD_STATIC_LIBS=ON"
+    ];
+  };
+
+  # Pre-build zstd
+  zstd-prebuilt = stdenv.mkDerivation {
+    pname = "zstd-kvrocks";
+    version = sha.zstd.commit;
+    src = fetchFromGitHub {
+      inherit (dep.zstd) owner repo;
+      rev = sha.zstd.commit;
+      hash = sha.zstd.hash;
+    };
+    nativeBuildInputs = [cmake];
+    cmakeDir = "../build/cmake";
+    cmakeFlags = [
+      "-DZSTD_BUILD_PROGRAMS=OFF"
+      "-DZSTD_BUILD_CONTRIB=OFF"
+      "-DZSTD_BUILD_TESTS=OFF"
+      "-DZSTD_BUILD_SHARED=OFF"
+      "-DZSTD_BUILD_STATIC=ON"
+      "-DZSTD_LEGACY_SUPPORT=OFF"
+    ];
+  };
+in
+  stdenv.mkDerivation (finalAttrs: let
+    sources =
+      lib.mapAttrs
+      (name: info:
+        fetchFromGitHub {
+          inherit (info) owner repo;
+          rev = sha.${name}.commit;
+          hash = sha.${name}.hash;
+        })
+      (builtins.removeAttrs dep ["jemalloc" "lua" "luajit" "lz4" "zstd"]);
+
+    lua-source = runCommand "lua-source" {} ''
+      cp -r ${sources.lua or (fetchFromGitHub {
+        inherit (dep.lua) owner repo;
+        rev = sha.lua.commit;
+        hash = sha.lua.hash;
+      })} $out
+      chmod -R +w $out
+      mkdir -p $out/src
+      cp ${lua-prebuilt}/lib/liblua.a $out/src/ || true
+    '';
+
+    luajit-source = runCommand "luajit-source" {} ''
+      cp -r ${sources.luajit or (fetchFromGitHub {
+        inherit (dep.luajit) owner repo;
+        rev = sha.luajit.commit;
+        hash = sha.luajit.hash;
+      })} $out
+      chmod -R +w $out
+      mkdir -p $out/src
+      cp ${luajit-prebuilt}/lib/libluajit.a $out/src/ || true
+    '';
+
+    lz4-source = runCommand "lz4-source" {} ''
+      cp -r ${sources.lz4 or (fetchFromGitHub {
+        inherit (dep.lz4) owner repo;
+        rev = sha.lz4.commit;
+        hash = sha.lz4.hash;
+      })} $out
+      chmod -R +w $out
+      mkdir -p $out/lib
+      cp ${lz4-prebuilt}/lib/liblz4.a $out/lib/ || true
+    '';
+
+    zstd-source = runCommand "zstd-source" {} ''
+      cp -r ${sources.zstd or (fetchFromGitHub {
+        inherit (dep.zstd) owner repo;
+        rev = sha.zstd.commit;
+        hash = sha.zstd.hash;
+      })} $out
+      chmod -R +w $out
+      mkdir -p $out/lib
+      cp ${zstd-prebuilt}/lib/libzstd.a $out/lib/ || true
+    '';
+
+    fetchFlags =
+      lib.mapAttrsToList
+      (
+        name: src: "-DFETCHCONTENT_SOURCE_DIR_${lib.toUpper name}=${src}"
+      )
+      sources
+      ++ (lib.optional (!enableLuaJIT) "-DFETCHCONTENT_SOURCE_DIR_LUA=${lua-source}")
+      ++ (lib.optional enableLuaJIT "-DFETCHCONTENT_SOURCE_DIR_LUAJIT=${luajit-source}")
+      ++ [
+        "-DFETCHCONTENT_SOURCE_DIR_LZ4=${lz4-source}"
+        "-DFETCHCONTENT_SOURCE_DIR_ZSTD=${zstd-source}"
+      ];
+
+    optFlags =
+      [
+        "-O3"
+        "-DNDEBUG"
+        "-fno-omit-frame-pointer"
+      ]
+      ++ lib.optional (march != null) "-march=${march}"
+      ++ lib.optional enableLto "-flto=thin";
+
+    buildFlags = lib.concatStringsSep " " optFlags;
+  in {
+    pname = "kvrocks";
+    version = lib.removePrefix "v" versionInfo.rev;
+    src = kvrocks_src;
+    inherit meta;
+
+    postPatch = ''
+      sedDep(){
+        local f=cmake/$1.cmake
+        sed -i 's/FetchContent_Populate/FetchContent_MakeAvailable/' $f
+        sed -i '/add_custom_target(make_/,/^  )/d' $f
+        sed -i '/add_dependencies(/d' $f
+      }
+      sedDep ${if enableLuaJIT then "luajit" else "lua"}
+      sedDep lz4
+      sedDep zstd
+
+      # Overwrite jemalloc.cmake to use the pre-built library as an IMPORTED target
+      cat > cmake/jemalloc.cmake <<EOF
+      add_library(jemalloc STATIC IMPORTED)
+      set_target_properties(jemalloc PROPERTIES
+        IMPORTED_LOCATION "${jemalloc-prebuilt}/lib/libjemalloc.a"
+        INTERFACE_INCLUDE_DIRECTORIES "${jemalloc-prebuilt}/include"
+      )
+      add_library(JeMalloc::JeMalloc ALIAS jemalloc)
+      EOF
+
+      sed -i '/add_executable(unittest/d' CMakeLists.txt
+      sed -i '/target_include_directories(unittest/d' CMakeLists.txt
+      sed -i '/target_link_libraries(unittest/d' CMakeLists.txt
+    '';
+
+    nativeBuildInputs = [
+      cmake
+      git
+      autoconf
+    ];
+
+    buildInputs =
+      [
+        jemalloc-prebuilt
+        stdenv.cc.cc.lib
+      ]
+      ++ lib.optionals stdenv.isDarwin [
+        cctools
+        libiconv
+      ];
+
+    cmakeFlags =
+      [
+        "-DENABLE_STATIC_LIBSTDCXX=OFF"
+        "-DDISABLE_JEMALLOC=OFF"
+        "-DENABLE_LUAJIT=${if enableLuaJIT then "ON" else "OFF"}"
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
+        "-DPORTABLE=${if portable then "1" else "0"}"
+        "-DENABLE_LTO=${if enableLto then "ON" else "OFF"}"
+      ]
+      ++ lib.optionals stdenv.isDarwin [
+        "-DCPPTRACE_ADDR2LINE_PATH_FINAL=${cctools}/bin/atos"
+      ]
+      ++ fetchFlags;
+
+    NIX_CFLAGS_COMPILE = buildFlags;
+    CXXFLAGS = buildFlags;
+    CFLAGS = buildFlags;
+
+    enableParallelBuilding = true;
+
+    postUnpack = ''
+      chmod -R +w $sourceRoot
+    '';
+
+    preConfigure = ''
+      export shareDocName="kvrocks"
+      mkdir -p build
+    '';
+
+    buildPhase = ''
+      runHook preBuild
+      make -j$NIX_BUILD_CORES
+      runHook postBuild
+    '';
+
+    dontUseCmakeInstall = true;
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/bin
+      cp kvrocks kvrocks2redis $out/bin/
+      chmod 755 $out/bin/kvrocks $out/bin/kvrocks2redis
+      runHook postInstall
+    '';
+
+    # Keep symbols for debugging and troubleshooting in production
+    dontStrip = true;
+  })

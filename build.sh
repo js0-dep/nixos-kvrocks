@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 
-set -e
-DIR=$(realpath $0) && DIR=${DIR%/*}
-cd $DIR
-set -x
+set -euo pipefail
+DIR=$(realpath "$0") && DIR=${DIR%/*}
+cd "$DIR"
+
+TARGET="${1:-default}"
 
 if ! command -v nix &>/dev/null; then
-  echo "Nix is not installed. Installing..."
-  if command -v apt-get &>/dev/null; then
-    sudo apt-get install -y nix
-  elif command -v brew &>/dev/null; then
+  echo "❌ Nix is not installed."
+  if command -v brew &>/dev/null; then
+    echo "Attempting to install via brew..."
     brew install nix
+  elif command -v apt-get &>/dev/null; then
+    sudo apt-get update && sudo apt-get install -y nix
   else
-    echo "Error: Please install nix manually from https://nixos.org/download.html"
+    echo "Please install Nix from https://nixos.org/download.html"
     exit 1
   fi
 fi
 
+echo "🔨 Building kvrocks (target: .#${TARGET})..."
 rm -f result
-NIX_ENFORCE_NO_NATIVE=0 nix build --print-build-logs
+exec nix build ".#${TARGET}" --print-build-logs --extra-experimental-features "nix-command flakes" "$@"

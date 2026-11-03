@@ -1,4 +1,4 @@
-name: keel_alive
+name: keep_alive
 
 permissions: write-all
 
@@ -9,26 +9,26 @@ env:
 on:
   workflow_dispatch:
   schedule:
-    # 分钟 小时 日期 月份 星期（0-6）//0代表星期天
+    # 每月1号执行一次，避免 GitHub 在仓库3个月无提交时停用定时任务
     - cron: "1 1 1 * *"
 
 jobs:
   run-it:
     runs-on: ubuntu-latest
-    name: keel_alive
+    name: keep_alive
     steps:
       - uses: actions/checkout@v6
-      - name: ci # 避免 github 代码库3个月没提交停止运行 crontab
+      - name: 更新活跃时间戳
         shell: bash
         run: |
           set -ex
-          echo $(date +%m) >.date
-          git config --global user.email $(git log -1 --pretty=format:'%ae')
-          git config --global user.name ${{ github.repository_owner }}
+          echo $(date +%m) > .date
+          git config --global user.email "action@github.com"
+          git config --global user.name "${{ github.repository_owner }}"
           git add .date
-          git commit -m^ || true
-      - name: push
+          git commit -m "chore: keep alive" || true
+      - name: 推送 main 分支
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          branch: main

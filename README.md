@@ -47,7 +47,17 @@ The project is packaged as a Nix flake, providing several outputs.
 To compile the project, execute the `nix build` command from the project root directory.
 
 ```shell
+# Standard portable build
 nix build
+
+# Optimized for modern x86_64 servers (AVX2, FMA, BMI1/2)
+nix build .#kvrocks-v3
+
+# Built with native CPU architecture optimizations
+nix build .#kvrocks-native
+
+# Built with LLVM/Clang + ThinLTO
+nix build .#kvrocks-clang
 ```
 
 This command builds the `kvrocks` package. The output is a symlink named `result` in the current directory, pointing to the build artifacts in the Nix store.

@@ -35,8 +35,8 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.packages.${pkgs.system}.default;
-      defaultText = lib.literalExpression "self.packages.${pkgs.system}.default";
+      default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      defaultText = lib.literalExpression "self.packages.\${pkgs.stdenv.hostPlatform.system}.default";
       description = "The kvrocks package to use.";
     };
 
@@ -112,6 +112,13 @@ in {
           "/var/lib/kvrocks"
           "/var/log/kvrocks"
         ];
+        Restart = "on-failure";
+        RestartSec = "5s";
+        # Hardening
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        NoNewPrivileges = true;
+        PrivateTmp = true;
       };
     };
   };
