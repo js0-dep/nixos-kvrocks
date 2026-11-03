@@ -1,3 +1,6 @@
+.codegraph/
+.rtk/
+
 /result
 /kvrocks/
 node_modules/
