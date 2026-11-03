@@ -218,7 +218,11 @@ in
         "-fvisibility-inlines-hidden"
         "-flto=thin"
       ]
-      ++ lib.optional (archFlags != "") archFlags;
+      ++ lib.optional (archFlags != "") archFlags
+      ++ lib.optionals stdenv.isx86_64 [
+        "-mpclmul"
+        "-maes"
+      ];
 
     buildFlags = lib.concatStringsSep " " optFlags;
   in {
